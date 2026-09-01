@@ -1,2 +1,3 @@
-energy_model_final.pkl
-energy_model.pkl
+﻿__pycache__/
+*.pyc
+*.db
