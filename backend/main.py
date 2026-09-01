@@ -2,8 +2,8 @@ from fastapi import FastAPI, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from database import engine, get_db, Base
-from models import OptimizationResult
+from .database import engine, get_db, Base
+from .models import OptimizationResult
 
 from data.optimizer import optimize_tower
 

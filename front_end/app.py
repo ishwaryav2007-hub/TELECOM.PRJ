@@ -30,15 +30,45 @@ if PROJECT_ROOT not in sys.path:
 
 
 # ============================================================
-# IMPORT AI OPTIMIZER
+# FASTAPI BACKEND CONNECTION
 # ============================================================
 
-try:
-    from data.optimizer import optimize_tower
-except Exception as e:
-    st.error("Unable to load AI optimizer.")
-    st.error(str(e))
-    st.stop()
+import requests
+
+BACKEND_URL = "http://127.0.0.1:8000"
+
+
+def optimize_via_backend(
+    load,
+    current_esmode,
+    current_txpower,
+    hour,
+    dayofweek
+):
+    """
+    Send the optimization request to the FastAPI backend.
+
+    The backend is responsible for:
+    - running the AI optimizer
+    - saving the result to SQLite
+    - returning the optimization result
+    """
+
+    response = requests.post(
+        f"{BACKEND_URL}/optimize",
+        json={
+            "load": float(load),
+            "esmode": float(current_esmode),
+            "txpower": float(current_txpower),
+            "hour": int(hour),
+            "dayofweek": int(dayofweek)
+        },
+        timeout=120
+    )
+
+    response.raise_for_status()
+
+    return response.json()
 
 
 # ============================================================
@@ -276,7 +306,7 @@ display_top = display_top.rename(
 
 st.dataframe(
     display_top,
-    use_container_width=True,
+    width="stretch",
     hide_index=True
 )
 
@@ -445,7 +475,7 @@ priority_display = priority_display.rename(
 
 st.dataframe(
     priority_display,
-    use_container_width=True,
+    width="stretch",
     hide_index=True
 )
 
@@ -624,7 +654,7 @@ st.write(
 if st.button(
     "⚡ Optimize Selected Tower",
     type="primary",
-    use_container_width=True
+    width="stretch"
 ):
 
     with st.spinner(
@@ -633,7 +663,7 @@ if st.button(
 
         try:
 
-            result = optimize_tower(
+            result = optimize_via_backend(
 
                 load=current_load,
 
@@ -902,7 +932,7 @@ st.warning(
 if st.button(
     "🚀 Analyze Entire Network",
     type="secondary",
-    use_container_width=True
+    width="stretch"
 ):
 
     network_results = []
@@ -943,7 +973,7 @@ if st.button(
             )
 
 
-            result = optimize_tower(
+            result = optimize_via_backend(
 
                 load=float(
                     latest["load"]
@@ -1188,7 +1218,7 @@ if "network_results" in st.session_state:
 
         st.dataframe(
             result_display,
-            use_container_width=True,
+            width="stretch",
             hide_index=True
         )
 
